@@ -1,4 +1,4 @@
-![Laravel Crud Generator](https://banners.beyondco.de/Laravel%20Tablar%20Crud%20Generator.png?theme=light&packageManager=composer+require&packageName=takielias%2Ftablar-crud-generator&pattern=topography&style=style_1&description=It%27s+a+simple+CRUD+generator+based+on+Laravel+Tablar+&md=1&showWatermark=0&fontSize=125px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
+![Laravel Tablar Crud Generator](https://banners.beyondco.de/Laravel%20Tablar%20Crud%20Generator.png?theme=light&packageManager=composer+require&packageName=takielias%2Ftablar-crud-generator&pattern=topography&style=style_1&description=It%27s+a+simple+CRUD+generator+based+on+Laravel+Tablar+&md=1&showWatermark=0&fontSize=125px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Total Downloads][ico-downloads]][link-downloads]
@@ -9,7 +9,7 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-Laravel Tablar Admin Dashboard https://github.com/takielias/tablar. 
+### Laravel Tablar Admin Dashboard https://github.com/takielias/tablar
 
 **Inspired** by `ibex/crud-generator`
 
