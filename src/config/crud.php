@@ -38,7 +38,7 @@ return [
     |
     */
 
-    'layout' => 'adminlte::page',
+    'layout' => 'tablar::page',
 
     'model' => [
         'namespace' => 'App\Models',

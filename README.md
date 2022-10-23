@@ -9,7 +9,9 @@
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-Laravel Tablar Admin Dashboard https://github.com/takielias/tablar
+Laravel Tablar Admin Dashboard https://github.com/takielias/tablar. 
+
+**Inspired** by `ibex/crud-generator`
 
 - Will create **Model** with Eloquent relations
 - Will create **Controller** with all resources
