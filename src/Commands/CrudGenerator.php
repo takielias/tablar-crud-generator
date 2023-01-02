@@ -26,6 +26,13 @@ class CrudGenerator extends GeneratorCommand
      * @var string
      */
     protected $description = 'Create bootstrap CRUD operations';
+    
+    /**
+     * Options of the console command.
+     *
+     * @var array
+     */
+    protected $crudOptions = [];
 
     /**
      * Execute the console command.
@@ -37,6 +44,8 @@ class CrudGenerator extends GeneratorCommand
     public function handle()
     {
         $this->info('Running Crud Generator ...');
+        
+        $this->crudOptions = $this->buildOptions()->options();
 
         $this->table = $this->getNameInput();
 
@@ -49,6 +58,10 @@ class CrudGenerator extends GeneratorCommand
 
         // Build the class name from table name
         $this->name = $this->_buildClassName();
+        
+        if($this->crudOptions['model-name']){
+            $this->name = $this->crudOptions['model-name'];
+        }
 
         // Generate the crud
         $this->buildOptions()
