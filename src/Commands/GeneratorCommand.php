@@ -466,6 +466,10 @@ abstract class GeneratorCommand extends Command
         if (!empty($route)) {
             $this->options['route'] = $route;
         }
+        
+        if (!empty($modelName)) {
+            $this->options['model-name'] = $modelName;
+        }
 
         return $this;
     }
