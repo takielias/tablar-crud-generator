@@ -18,7 +18,8 @@ class CrudGenerator extends GeneratorCommand
      */
     protected $signature = 'make:crud
                             {name : Table name}
-                            {--route= : Custom route name}';
+                            {--route= : Custom route name}
+                            {--crud-name= : Custom crud name}';
 
     /**
      * The console command description.
@@ -26,6 +27,13 @@ class CrudGenerator extends GeneratorCommand
      * @var string
      */
     protected $description = 'Create bootstrap CRUD operations';
+
+    /**
+     * Options of the console command.
+     *
+     * @var array
+     */
+    protected $crudOptions = [];
 
     /**
      * Execute the console command.
@@ -38,6 +46,8 @@ class CrudGenerator extends GeneratorCommand
     {
         $this->info('Running Crud Generator ...');
 
+        $this->crudOptions = $this->buildOptions()->options();
+
         $this->table = $this->getNameInput();
 
         // If table not exist in DB return
@@ -48,7 +58,11 @@ class CrudGenerator extends GeneratorCommand
         }
 
         // Build the class name from table name
-        $this->name = $this->_buildClassName();
+        if($this->crudOptions['crud-name']){
+            $this->name = $this->crudOptions['crud-name'];
+        } else {
+            $this->name = $this->_buildClassName();
+        }
 
         // Generate the crud
         $this->buildOptions()

@@ -462,9 +462,14 @@ abstract class GeneratorCommand extends Command
     protected function buildOptions()
     {
         $route = $this->option('route');
+        $crudName = $this->option('crud-name');
 
         if (!empty($route)) {
             $this->options['route'] = $route;
+        }
+
+        if (!empty($crudName)) {
+            $this->options['crud-name'] = $crudName;
         }
 
         return $this;
