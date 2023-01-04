@@ -55,6 +55,14 @@ Route name in plural slug case.
 php artisan make:crud {table_name} --route={route_name}
 ```
 
+ - Custom Crud name: the name of the scaffold.
+```
+php artisan make:crud {table_name} --crud-name={crud_name}
+
+# For example:
+# php artisan make:crud emergencies —-crud-name=Emergencies
+```
+
 ## Example
 
 <img width="855" alt="tablar-crud-generator-light" src="https://user-images.githubusercontent.com/38932580/197386382-562d6e3a-055a-42b8-8524-df76f70aa051.png">
