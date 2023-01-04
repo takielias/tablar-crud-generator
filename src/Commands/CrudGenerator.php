@@ -19,7 +19,8 @@ class CrudGenerator extends GeneratorCommand
     protected $signature = 'make:crud
                             {name : Table name}
                             {--route= : Custom route name}
-                            {--crud-name= : Custom crud name}';
+                            {--crud-name= : Custom crud name}
+                            {--lang= : language}';
 
     /**
      * The console command description.
@@ -57,18 +58,21 @@ class CrudGenerator extends GeneratorCommand
             return false;
         }
 
+        // set language
+        $this->_setLanguage();
+
         // Build the class name from table name
-        if($this->crudOptions['crud-name']){
-            $this->name = $this->crudOptions['crud-name'];
-        } else {
-            $this->name = $this->_buildClassName();
-        }
+        $this->name = $this->_buildClassName();
+
+        // Build the route name
+        $this->routeName = $this->_buildRouteName(); 
 
         // Generate the crud
         $this->buildOptions()
             ->buildController()
             ->buildModel()
-            ->buildViews();
+            ->buildViews()
+            ->buildRoute();
 
         $this->info('Created Successfully.');
 
@@ -175,12 +179,62 @@ class CrudGenerator extends GeneratorCommand
     }
 
     /**
+     * Build the Controller Class and save in app/Http/Controllers.
+     *
+     * @return $this
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     *
+     */
+    protected function buildRoute()
+    {       
+        $route = "Route::resource('/";
+        $route .= $this->routeName . "', ";
+        $route .= $this->controllerNamespace ."\\". $this->name;
+        $route .= 'Controller::class);';
+      
+        $routesPath = base_path("routes/web.php");
+
+        $this->files->append($routesPath, $route . PHP_EOL); 
+
+        $this->info('Creating Route ...');
+
+        return $this;
+    }
+
+    /**
+     * Make the class name from table name.
+     *
+     */
+    private function _setLanguage()
+    {        
+        if($this->crudOptions['lang']){
+            Pluralizer::useLanguage($this->crudOptions['lang']);
+        } 
+    }
+
+    /**
+     * Make the class name from table name.
+     *
+     * @return string
+     */
+    private function _buildRouteName()
+    {       
+        if($this->crudOptions['route']){
+            return $this->crudOptions['route'];
+        } 
+        return strtolower($this->name);
+    }
+
+    /**
      * Make the class name from table name.
      *
      * @return string
      */
     private function _buildClassName()
     {
+        if($this->crudOptions['crud-name']){
+            return ucfirst($this->crudOptions['crud-name']);
+        }
         return Str::studly(Str::singular($this->table));
     }
 }
