@@ -19,7 +19,9 @@ class CrudGenerator extends GeneratorCommand
     protected $signature = 'make:crud
                             {name : Table name}
                             {--route= : Custom route name}
-                            {--crud-name= : Custom crud name}';
+                            {--crud-name= : Custom crud name}
+                            {--lang= : language}';
+
 
     /**
      * The console command description.
@@ -55,6 +57,11 @@ class CrudGenerator extends GeneratorCommand
             $this->error("`{$this->table}` table not exist");
 
             return false;
+        }
+
+        // set language
+        if($this->crudOptions['lang']){
+            Pluralizer::useLanguage($this->crudOptions['lang']);
         }
 
         // Build the class name from table name

@@ -463,6 +463,7 @@ abstract class GeneratorCommand extends Command
     {
         $route = $this->option('route');
         $crudName = $this->option('crud-name');
+        $lang = $this->option('lang');
 
         if (!empty($route)) {
             $this->options['route'] = $route;
@@ -470,6 +471,10 @@ abstract class GeneratorCommand extends Command
 
         if (!empty($crudName)) {
             $this->options['crud-name'] = $crudName;
+        }
+
+        if (!empty($lang)) {
+            $this->options['lang'] = $lang;
         }
 
         return $this;
