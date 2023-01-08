@@ -63,6 +63,14 @@ php artisan make:crud {table_name} --crud-name={crud_name}
 # php artisan make:crud emergencies —-crud-name=Emergencies
 ```
 
+ - Custom language: specify the language that should be used by the inflector (french, norwegian-bokmal, portuguese, spanish or turkish)
+```
+php artisan make:crud {table_name} --lang={lang}
+# For example:
+# php artisan make:crud incidencies --lang=spanish
+```
+
+
 ## Example
 
 <img width="855" alt="tablar-crud-generator-light" src="https://user-images.githubusercontent.com/38932580/197386382-562d6e3a-055a-42b8-8524-df76f70aa051.png">
