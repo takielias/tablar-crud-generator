@@ -2,6 +2,7 @@
 
 namespace Tablar\CrudGenerator\Commands;
 
+use Illuminate\Support\Pluralizer;
 use Illuminate\Support\Str;
 
 /**
