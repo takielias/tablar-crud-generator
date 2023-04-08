@@ -17,7 +17,7 @@
         "laravel package"
     ],
     "require": {
-        "laravel/framework": "^9.0",
+        "laravel/framework": "^9.0|^10.0",
         "laravelcollective/html": "^6.0|^7.0|^8.0"
     },
     "autoload": {
