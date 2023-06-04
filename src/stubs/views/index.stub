@@ -68,7 +68,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-responsive">
+                        <div class="table-responsive min-vh-100">
                             <table class="table card-table table-vcenter text-nowrap datatable">
                                 <thead>
                                 <tr>
