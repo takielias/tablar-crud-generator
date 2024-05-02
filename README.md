@@ -22,6 +22,9 @@
 - Will create **Controller** with all resources
 - Will create **views** in Bootstrap 5.*
 
+```
+We have replaced the laravelcollective/html package with konekt/html. This update ensures compatibility with PHP 8.1+ and Laravel 10 & 11, while preserving the same functionality as the original package.
+```
 ## Requirements
     Laravel >= 9.*
     PHP >= 8.1
