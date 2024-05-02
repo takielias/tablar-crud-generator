@@ -3,7 +3,7 @@
 
 [![Latest Version](https://img.shields.io/packagist/v/takielias/tablar-crud-generator?color=blue&label=release&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
 [![Stars](https://img.shields.io/github/stars/takielias/tablar-crud-generator?color=rgb%2806%20189%20248%29&label=stars&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
-[![Total Downloads](https://img.shields.io/packagist/dt/takielias/tablar.svg?color=rgb%28249%20115%2022%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Total Downloads](https://img.shields.io/packagist/dt/takielias/tablar-crud-generator.svg?color=rgb%28249%20115%2022%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
 [![Forks](https://img.shields.io/github/forks/takielias/tablar-crud-generator?color=rgb%28134%20115%2022%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
 [![Issues](https://img.shields.io/github/issues/takielias/tablar-crud-generator?color=rgb%28134%20239%20128%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
 [![Linkedin](https://img.shields.io/badge/-LinkedIn-black.svg?logo=linkedin&color=rgba(235%2068%2050)&style=for-the-badge)](https://linkedin.com/in/takielias)
