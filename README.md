@@ -1,13 +1,12 @@
 ![Laravel Tablar Crud Generator](https://banners.beyondco.de/Laravel%20Tablar%20Crud%20Generator.png?theme=light&packageManager=composer+require&packageName=takielias%2Ftablar-crud-generator&pattern=topography&style=style_1&description=It%27s+a+simple+CRUD+generator+based+on+Laravel+Tablar+&md=1&showWatermark=0&fontSize=125px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
 
-[![Latest Version on Packagist][ico-version]][link-packagist]
-[![Total Downloads][ico-downloads]][link-downloads]
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+
+[![Latest Version](https://img.shields.io/packagist/v/takielias/tablar-crud-generator?color=blue&label=release&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Stars](https://img.shields.io/github/stars/takielias/tablar-crud-generator?color=rgb%2806%20189%20248%29&label=stars&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Total Downloads](https://img.shields.io/packagist/dt/takielias/tablar.svg?color=rgb%28249%20115%2022%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Forks](https://img.shields.io/github/forks/takielias/tablar-crud-generator?color=rgb%28134%20115%2022%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Issues](https://img.shields.io/github/issues/takielias/tablar-crud-generator?color=rgb%28134%20239%20128%29&style=for-the-badge)](https://packagist.org/packages/takielias/tablar)
+[![Linkedin](https://img.shields.io/badge/-LinkedIn-black.svg?logo=linkedin&color=rgba(235%2068%2050)&style=for-the-badge)](https://linkedin.com/in/takielias)
 
 <a href="https://www.buymeacoffee.com/takielias" target="_blank"> <img align="left" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="50" width="210" alt="takielias" /></a>
 
