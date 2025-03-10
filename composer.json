@@ -17,8 +17,8 @@
         "laravel package"
     ],
     "require": {
-        "laravel/framework": "^9.0|^10.0|^11.0",
-        "konekt/html": "^6.5"
+        "laravel/framework": "^10.0|^11.0|^12.0",
+        "konekt/html": "^6.6"
     },
     "autoload": {
         "psr-4": {
