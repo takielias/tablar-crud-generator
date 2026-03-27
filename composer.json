@@ -18,12 +18,21 @@
     ],
     "require": {
         "illuminate/support": ">=10.0",
-        "konekt/html": "^6.6"
+        "rdx/laravelcollective-html": "^6.6"
     },
     "autoload": {
         "psr-4": {
             "Tablar\\CrudGenerator\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tablar\\CrudGenerator\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0"
     },
     "extra": {
         "laravel": {
