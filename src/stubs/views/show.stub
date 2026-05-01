@@ -33,9 +33,7 @@
         <div class="container-xl">
             <div class="row row-deck row-cards">
                 <div class="col-12">
-                    @if(config('tablar.display_alert'))
-                        @include('tablar::common.alert')
-                    @endif
+                    @include('tablar::common.alert')
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">{{modelTitle}} Details</h3>
