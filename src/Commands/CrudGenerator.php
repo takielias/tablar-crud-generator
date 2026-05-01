@@ -186,17 +186,20 @@ class CrudGenerator extends GeneratorCommand
      */
     protected function buildRoute()
     {
-        // Drop any leading slash on the route name. Laravel's ResourceRegistrar
-        // builds route names from the resource URI verbatim, so a leading '/'
-        // produces names like '/admin/products.create' while views generate
-        // route('admin/products.create') (no leading slash). The mismatch surfaces
-        // as "Route [admin/products.create] not defined" at render time.
+        // Resource URI keeps the slashes (URL path stays /admin/products).
+        // Route NAMES need to be dot-mirrored: Laravel's default naming for
+        // `Route::resource('admin/products', ...)` produces `products.*`
+        // (last segment only) — collides with sibling resources and breaks
+        // generated views that call `route('admin/products.create')`.
+        // Pin names explicitly via ->names('admin.products') so generated
+        // views can call route('admin.products.create') and resolve cleanly.
         $resourceUri = ltrim($this->routeName, '/');
+        $resourceName = str_replace('/', '.', $resourceUri);
 
         $route = "Route::resource('";
         $route .= $resourceUri . "', ";
         $route .= $this->controllerNamespace ."\\". $this->name;
-        $route .= 'Controller::class);';
+        $route .= "Controller::class)->names('".$resourceName."');";
 
         $routesPath = base_path("routes/web.php");
 

@@ -357,14 +357,17 @@ class CrudGeneratorTest extends TestCase
         ])->assertSuccessful();
 
         $routeContent = $this->files->get(base_path('routes/web.php'));
-        // Critical: NO leading slash on the resource URI. With one, Laravel's
-        // ResourceRegistrar names routes "/admin/products.create" while views
-        // call route('admin/products.create') → "Route not defined" at render.
+        // URI keeps slashes (URL is /admin/products) BUT route names are pinned
+        // via ->names('admin.products') so views can call route('admin.products.create').
+        // Laravel's default for Route::resource('admin/products', ...) names routes
+        // as 'products.*' (last segment only) which collides with sibling resources.
         $this->assertStringContainsString("Route::resource('admin/products'", $routeContent);
+        $this->assertStringContainsString("->names('admin.products')", $routeContent);
         $this->assertStringNotContainsString("Route::resource('/admin/products'", $routeContent);
 
         $controllerContent = $this->files->get(app_path('Http/Controllers/CrudTestPostController.php'));
-        $this->assertStringContainsString("route('admin/products.index')", $controllerContent);
+        $this->assertStringContainsString("route('admin.products.index')", $controllerContent);
+        $this->assertStringNotContainsString("route('admin/products.index')", $controllerContent);
 
         $this->restoreRoutesFile($originalRoutes);
     }
