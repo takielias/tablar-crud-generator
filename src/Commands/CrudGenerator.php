@@ -185,15 +185,25 @@ class CrudGenerator extends GeneratorCommand
      *
      */
     protected function buildRoute()
-    {       
-        $route = "Route::resource('/";
-        $route .= $this->routeName . "', ";
+    {
+        // Resource URI keeps the slashes (URL path stays /admin/products).
+        // Route NAMES need to be dot-mirrored: Laravel's default naming for
+        // `Route::resource('admin/products', ...)` produces `products.*`
+        // (last segment only) — collides with sibling resources and breaks
+        // generated views that call `route('admin/products.create')`.
+        // Pin names explicitly via ->names('admin.products') so generated
+        // views can call route('admin.products.create') and resolve cleanly.
+        $resourceUri = ltrim($this->routeName, '/');
+        $resourceName = str_replace('/', '.', $resourceUri);
+
+        $route = "Route::resource('";
+        $route .= $resourceUri . "', ";
         $route .= $this->controllerNamespace ."\\". $this->name;
-        $route .= 'Controller::class);';
-      
+        $route .= "Controller::class)->names('".$resourceName."');";
+
         $routesPath = base_path("routes/web.php");
 
-        $this->files->append($routesPath, $route . PHP_EOL); 
+        $this->files->append($routesPath, $route . PHP_EOL);
 
         $this->info('Creating Route ...');
 

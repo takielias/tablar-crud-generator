@@ -339,7 +339,53 @@ class CrudGeneratorTest extends TestCase
         $this->assertStringContainsString("route('blog-posts.index')", $controllerContent);
 
         $routeContent = $this->files->get(base_path('routes/web.php'));
-        $this->assertStringContainsString("Route::resource('/blog-posts'", $routeContent);
+        // Resource URI registered without a leading slash so generated route
+        // NAMES (blog-posts.index/create/etc.) match the route() lookups in views.
+        $this->assertStringContainsString("Route::resource('blog-posts'", $routeContent);
+        $this->assertStringNotContainsString("Route::resource('/blog-posts'", $routeContent);
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
+
+    public function testCrudGeneratorWithNestedCustomRoute(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+
+        $this->artisan('make:crud', [
+            'name' => $this->testTable,
+            '--route' => 'admin/products',
+        ])->assertSuccessful();
+
+        $routeContent = $this->files->get(base_path('routes/web.php'));
+        // URI keeps slashes (URL is /admin/products) BUT route names are pinned
+        // via ->names('admin.products') so views can call route('admin.products.create').
+        // Laravel's default for Route::resource('admin/products', ...) names routes
+        // as 'products.*' (last segment only) which collides with sibling resources.
+        $this->assertStringContainsString("Route::resource('admin/products'", $routeContent);
+        $this->assertStringContainsString("->names('admin.products')", $routeContent);
+        $this->assertStringNotContainsString("Route::resource('/admin/products'", $routeContent);
+
+        $controllerContent = $this->files->get(app_path('Http/Controllers/CrudTestPostController.php'));
+        $this->assertStringContainsString("route('admin.products.index')", $controllerContent);
+        $this->assertStringNotContainsString("route('admin/products.index')", $controllerContent);
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
+
+    public function testCrudGeneratorStripsLeadingSlashFromCustomRoute(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+
+        // User passes --route=/admin/products (with leading slash) — should still
+        // produce Route::resource('admin/products', ...) without the slash.
+        $this->artisan('make:crud', [
+            'name' => $this->testTable,
+            '--route' => '/admin/products',
+        ])->assertSuccessful();
+
+        $routeContent = $this->files->get(base_path('routes/web.php'));
+        $this->assertStringContainsString("Route::resource('admin/products'", $routeContent);
+        $this->assertStringNotContainsString("Route::resource('/admin/products'", $routeContent);
 
         $this->restoreRoutesFile($originalRoutes);
     }
