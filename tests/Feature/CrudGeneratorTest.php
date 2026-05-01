@@ -9,42 +9,41 @@ use Tablar\CrudGenerator\Tests\TestCase;
 /**
  * Feature tests for the CRUD generator command.
  *
- * These tests require a MySQL connection because the package uses
- * MySQL-specific queries (SHOW COLUMNS, SHOW KEYS, INFORMATION_SCHEMA).
+ * Default driver: sqlite :memory: (no external service required).
  *
- * Start DDEV or set DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD to run.
+ * To run against a real mysql or pgsql:
+ *   DB_DRIVER=mysql DB_HOST=db DB_DATABASE=db DB_USERNAME=db DB_PASSWORD=db vendor/bin/phpunit
+ *   DB_DRIVER=pgsql DB_HOST=postgres DB_DATABASE=db DB_USERNAME=db DB_PASSWORD=db vendor/bin/phpunit
+ *
+ * The generator is now driver-agnostic via `Schema::getColumns/getIndexes/getForeignKeys`
+ * (Laravel 10.32+) so the same suite passes on every supported driver.
  */
 class CrudGeneratorTest extends TestCase
 {
     private Filesystem $files;
     private string $testTable = 'crud_test_posts';
-    private static bool $mysqlAvailable = false;
-    private static bool $checkedMysql = false;
-
-    private static function checkMysqlAvailability(): bool
-    {
-        if (self::$checkedMysql) {
-            return self::$mysqlAvailable;
-        }
-        self::$checkedMysql = true;
-
-        $host = $_ENV['DB_HOST'] ?? 'db';
-        $port = (int) ($_ENV['DB_PORT'] ?? 3306);
-        $connection = @fsockopen($host, $port, $errno, $errstr, 2);
-        if ($connection) {
-            fclose($connection);
-            self::$mysqlAvailable = true;
-        }
-
-        return self::$mysqlAvailable;
-    }
 
     protected function defineEnvironment($app): void
     {
         parent::defineEnvironment($app);
 
-        if (self::checkMysqlAvailability()) {
-            $app['config']->set('database.default', 'mysql');
+        // Feature tests actually run the generator, which requires the
+        // configured layout view to exist. tablar::page would force a
+        // takielias/tablar dependency on the test suite — fall back to the
+        // bundled layouts.app stub instead.
+        $app['config']->set('crud.layout', 'layouts.app');
+
+        $driver = env('DB_DRIVER', 'sqlite');
+        $app['config']->set('database.default', $driver);
+
+        if ($driver === 'sqlite') {
+            $app['config']->set('database.connections.sqlite', [
+                'driver' => 'sqlite',
+                'database' => ':memory:',
+                'prefix' => '',
+                'foreign_key_constraints' => true,
+            ]);
+        } elseif ($driver === 'mysql') {
             $app['config']->set('database.connections.mysql', [
                 'driver' => 'mysql',
                 'host' => env('DB_HOST', 'db'),
@@ -56,16 +55,25 @@ class CrudGeneratorTest extends TestCase
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
             ]);
+        } elseif ($driver === 'pgsql') {
+            $app['config']->set('database.connections.pgsql', [
+                'driver' => 'pgsql',
+                'host' => env('DB_HOST', 'postgres'),
+                'port' => env('DB_PORT', '5432'),
+                'database' => env('DB_DATABASE', 'db'),
+                'username' => env('DB_USERNAME', 'db'),
+                'password' => env('DB_PASSWORD', 'db'),
+                'charset' => 'utf8',
+                'prefix' => '',
+                'schema' => 'public',
+                'sslmode' => 'prefer',
+            ]);
         }
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (!self::$mysqlAvailable) {
-            $this->markTestSkipped('MySQL not available — feature tests require MySQL (SHOW COLUMNS, INFORMATION_SCHEMA).');
-        }
 
         $this->files = new Filesystem();
 
@@ -82,18 +90,16 @@ class CrudGeneratorTest extends TestCase
 
     protected function tearDown(): void
     {
-        if (self::$mysqlAvailable) {
-            try {
-                Schema::dropIfExists($this->testTable);
-                Schema::dropIfExists('crud_test_soft_items');
-            } catch (\Exception $e) {
-                // Ignore cleanup errors
-            }
-
-            $this->cleanGeneratedFiles('CrudTestPost');
-            $this->cleanGeneratedFiles('Article');
-            $this->cleanGeneratedFiles('CrudTestSoftItem');
+        try {
+            Schema::dropIfExists($this->testTable);
+            Schema::dropIfExists('crud_test_soft_items');
+        } catch (\Exception $e) {
+            // Ignore cleanup errors
         }
+
+        $this->cleanGeneratedFiles('CrudTestPost');
+        $this->cleanGeneratedFiles('Article');
+        $this->cleanGeneratedFiles('CrudTestSoftItem');
 
         parent::tearDown();
     }
@@ -431,7 +437,8 @@ class CrudGeneratorTest extends TestCase
             ->assertSuccessful();
 
         $content = $this->files->get(resource_path('views/crud-test-post/index.blade.php'));
-        $this->assertStringContainsString("@extends('tablar::page')", $content);
+        $expected = "@extends('".config('crud.layout')."')";
+        $this->assertStringContainsString($expected, $content);
 
         $this->restoreRoutesFile($originalRoutes);
     }

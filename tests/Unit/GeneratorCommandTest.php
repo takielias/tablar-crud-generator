@@ -97,6 +97,6 @@ class GeneratorCommandTest extends TestCase
     {
         $this->artisan('make:crud', ['name' => 'non_existent_table_xyz'])
             ->expectsOutput('`non_existent_table_xyz` table not exist')
-            ->assertExitCode(0);
+            ->assertExitCode(1);
     }
 }

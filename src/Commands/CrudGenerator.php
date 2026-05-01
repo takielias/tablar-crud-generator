@@ -40,11 +40,9 @@ class CrudGenerator extends GeneratorCommand
     /**
      * Execute the console command.
      *
-     * @return bool|null
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     *
      */
-    public function handle()
+    public function handle(): int
     {
         $this->info('Running Crud Generator ...');
 
@@ -56,7 +54,7 @@ class CrudGenerator extends GeneratorCommand
         if (!$this->tableExists()) {
             $this->error("`{$this->table}` table not exist");
 
-            return false;
+            return self::FAILURE;
         }
 
         // set language
@@ -66,7 +64,7 @@ class CrudGenerator extends GeneratorCommand
         $this->name = $this->_buildClassName();
 
         // Build the route name
-        $this->routeName = $this->_buildRouteName(); 
+        $this->routeName = $this->_buildRouteName();
 
         // Generate the crud
         $this->buildOptions()
@@ -77,7 +75,7 @@ class CrudGenerator extends GeneratorCommand
 
         $this->info('Created Successfully.');
 
-        return true;
+        return self::SUCCESS;
     }
 
     /**
