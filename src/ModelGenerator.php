@@ -2,7 +2,7 @@
 
 namespace Tablar\CrudGenerator;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -65,14 +65,18 @@ class ModelGenerator
     {
         $eloquent = '';
         foreach ($tableKeys as $tableKey) {
-            if ($relation->foreign_key == $tableKey->Column_name) {
-                $eloquent = 'hasMany';
+            $columns = $tableKey['columns'] ?? [];
 
-                if ($tableKey->Key_name == 'PRIMARY') {
-                    $eloquent = 'hasOne';
-                } elseif ($tableKey->Non_unique == 0 && $tableKey->Seq_in_index == 1) {
-                    $eloquent = 'hasOne';
-                }
+            if (! in_array($relation->foreign_key, $columns, true)) {
+                continue;
+            }
+
+            $eloquent = 'hasMany';
+
+            if (! empty($tableKey['primary'])) {
+                $eloquent = 'hasOne';
+            } elseif (! empty($tableKey['unique']) && (reset($columns) === $relation->foreign_key)) {
+                $eloquent = 'hasOne';
             }
         }
 
@@ -140,35 +144,71 @@ class ModelGenerator
     /**
      * Get all relations from Table.
      *
+     * Driver-agnostic via Laravel Schema (Laravel 10.32+). Iterates every other
+     * table to find inbound foreign keys (other -> this) and reads this table's
+     * outbound foreign keys directly. Works on sqlite / mysql / pgsql / sqlsrv.
+     *
      * @return array
      */
     private function _getTableRelations()
     {
-        $db = DB::getDatabaseName();
-        $sql = <<<SQL
-SELECT TABLE_NAME ref_table, COLUMN_NAME foreign_key, REFERENCED_COLUMN_NAME local_key, '1' ref
-  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-  WHERE REFERENCED_TABLE_NAME = '$this->table' AND TABLE_SCHEMA = '$db'
-UNION
-SELECT REFERENCED_TABLE_NAME ref_table, REFERENCED_COLUMN_NAME foreign_key, COLUMN_NAME local_key, '0' ref
-  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-  WHERE TABLE_NAME = '$this->table' AND TABLE_SCHEMA = '$db' AND REFERENCED_TABLE_NAME IS NOT NULL
+        $relations = [];
+        $thisTable = $this->table;
 
-ORDER BY ref_table ASC
-SQL;
+        // Inbound: foreign keys on OTHER tables that reference this table.
+        foreach (Schema::getTables() as $other) {
+            $otherName = $other['name'] ?? null;
 
-        return DB::select($sql);
+            if (! $otherName || $otherName === $thisTable) {
+                continue;
+            }
+
+            foreach (Schema::getForeignKeys($otherName) as $fk) {
+                if (($fk['foreign_table'] ?? null) !== $thisTable) {
+                    continue;
+                }
+
+                $columns = $fk['columns'] ?? [];
+                $foreignColumns = $fk['foreign_columns'] ?? [];
+
+                $relations[] = (object) [
+                    'ref_table' => $otherName,
+                    'foreign_key' => $columns[0] ?? '',
+                    'local_key' => $foreignColumns[0] ?? '',
+                    'ref' => '1',
+                ];
+            }
+        }
+
+        // Outbound: foreign keys on THIS table that reference others.
+        foreach (Schema::getForeignKeys($thisTable) as $fk) {
+            $columns = $fk['columns'] ?? [];
+            $foreignColumns = $fk['foreign_columns'] ?? [];
+
+            $relations[] = (object) [
+                'ref_table' => $fk['foreign_table'] ?? '',
+                'foreign_key' => $foreignColumns[0] ?? '',
+                'local_key' => $columns[0] ?? '',
+                'ref' => '0',
+            ];
+        }
+
+        usort($relations, fn ($a, $b) => strcmp($a->ref_table, $b->ref_table));
+
+        return $relations;
     }
 
     /**
-     * Get all Keys from table.
+     * Get all indexes from a table.
      *
-     * @param $table
+     * Driver-agnostic via Schema::getIndexes (Laravel 10.32+). Each entry is
+     * an array shape: [name, columns, type, unique, primary].
      *
+     * @param  string  $table
      * @return array
      */
     private function _getTableKeys($table)
     {
-        return DB::select("SHOW KEYS FROM {$table}");
+        return Schema::getIndexes($table);
     }
 }

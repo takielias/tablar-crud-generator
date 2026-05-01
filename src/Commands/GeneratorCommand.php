@@ -6,7 +6,6 @@ use Tablar\CrudGenerator\ModelGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Symfony\Component\Console\Input\InputArgument;
@@ -364,7 +363,10 @@ abstract class GeneratorCommand extends Command
     protected function getColumns()
     {
         if (empty($this->tableColumns)) {
-            $this->tableColumns = DB::select('SHOW COLUMNS FROM ' . $this->table);
+            // Driver-agnostic via Laravel Schema (Laravel 10.32+). Works across
+            // sqlite / mysql / pgsql / sqlsrv. Returns an array of array-shaped
+            // metadata: [name, type_name, type, nullable, default, auto_increment, ...].
+            $this->tableColumns = Schema::getColumns($this->table);
         }
 
         return $this->tableColumns;
@@ -379,7 +381,7 @@ abstract class GeneratorCommand extends Command
         $columns = [];
 
         foreach ($this->getColumns() as $column) {
-            $columns[] = $column->Field;
+            $columns[] = $column['name'];
         }
 
         return array_filter($columns, function ($value) use ($unwanted) {
@@ -399,13 +401,16 @@ abstract class GeneratorCommand extends Command
         $softDeletesNamespace = $softDeletes = '';
 
         foreach ($this->getColumns() as $value) {
-            $properties .= "\n * @property $$value->Field";
+            $field = $value['name'];
+            $nullable = (bool) ($value['nullable'] ?? true);
 
-            if ($value->Null == 'NO') {
-                $rulesArray[$value->Field] = 'required';
+            $properties .= "\n * @property \${$field}";
+
+            if (! $nullable) {
+                $rulesArray[$field] = 'required';
             }
 
-            if ($value->Field == 'deleted_at') {
+            if ($field === 'deleted_at') {
                 $softDeletesNamespace = "use Illuminate\Database\Eloquent\SoftDeletes;\n";
                 $softDeletes = "use SoftDeletes;\n";
             }
