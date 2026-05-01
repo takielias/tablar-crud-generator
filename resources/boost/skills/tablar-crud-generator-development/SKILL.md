@@ -81,7 +81,7 @@ Creating Route ...
 
 ## DB-schema-driven field inference
 
-The generator reads the live DB schema via `Schema::hasTable()` + a column inspector. Inferred mapping (verify against `src/Commands/GeneratorCommand.php` if customizing):
+The generator reads the live DB schema via Laravel's driver-agnostic `Schema::getColumns()` + `Schema::getIndexes()` + `Schema::getForeignKeys()` API (Laravel 10.32+). Works across **sqlite, mysql / mariadb, postgres, sqlsrv** with the same code path. Inferred mapping (verify against `src/Commands/GeneratorCommand.php` if customizing):
 
 - `string`, `text` → text input / textarea.
 - `integer`, `bigInteger`, `decimal` → number input.
@@ -91,6 +91,10 @@ The generator reads the live DB schema via `Schema::hasTable()` + a column inspe
 - `json` → text input (limited support).
 
 Generator does NOT generate the migration. The table must exist before running.
+
+### Foreign-key relations
+
+Inbound and outbound foreign keys are detected via `Schema::getForeignKeys()` + a sweep over `Schema::getTables()` for inbound references. Generated Models declare `hasOne` / `hasMany` / matching docblocks for each FK relation found. Driver-agnostic — same behavior on every supported driver.
 
 ## Recipes
 
@@ -145,6 +149,12 @@ sed -i '/Route::resource.*ProductController::class/d' routes/web.php
 php artisan make:crud products
 ```
 
+## Driver compatibility
+
+Generator works on **sqlite, mysql / mariadb, postgres, sqlsrv** via Laravel's driver-agnostic Schema API (Laravel 10.32+). Test suite passes on all 3 of sqlite / mysql / pgsql in the package's CI matrix.
+
+Older versions (pre-`fix/cross-db-schema-introspection`) used MySQL-only `SHOW COLUMNS` / `SHOW KEYS` / `INFORMATION_SCHEMA.KEY_COLUMN_USAGE` and crashed on sqlite + pgsql. If you see SQL errors during `make:crud`, ensure the package is at the cross-DB-fixed release.
+
 ## Common pitfalls
 
 - **`make:crud` aborts with "`{table}` table not exist"** — migrate first. Generator does not create migrations.
@@ -152,6 +162,7 @@ php artisan make:crud products
 - **Existing files overwritten silently** — no `--force` prompt. Always commit before regenerating.
 - **Generated form throws "Method [flatPicker] not found" or similar** — generator targets generic Blade markup, not tablar-kit FormBuilder. If you want FormBuilder fields, hand-port the generated `form-field.blade.php` to use `<x-flat-picker>`, `<x-tom-select>`, etc.
 - **`ajax-submit` class on submit button does nothing** — pairs with takielias/lab's auto-binder. Install lab via `/laravel-boost:install-laravel-ajax-builder` if not already present, OR remove the class for plain form submission.
+- **`make:crud` returns exit code 1 even after "Created Successfully."** — pre-`fix/cross-db-schema-introspection` versions had `handle()` returning `bool`, which Laravel cast to inverted exit codes. Upgrade past the fix.
 - **Field type detection misclassifies columns** — `enum` may render as text input depending on driver/version. Verify generated form-field.blade.php and adjust manually.
 
 ## Configuration
