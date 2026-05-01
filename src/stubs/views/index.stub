@@ -33,7 +33,9 @@
     <!-- Page body -->
     <div class="page-body">
         <div class="container-xl">
-            @include('tablar::common.alert')
+            @if(config('tablar.display_alert'))
+                @include('tablar::common.alert')
+            @endif
             <div class="row row-deck row-cards">
                 <div class="col-12">
                     <div class="card">
