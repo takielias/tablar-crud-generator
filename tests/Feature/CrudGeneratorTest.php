@@ -595,4 +595,56 @@ class CrudGeneratorTest extends TestCase
 
         $this->restoreRoutesFile($originalRoutes);
     }
+
+    private function writeAuthModel(): string
+    {
+        $path = app_path('Models/CrudTestPost.php');
+        $this->files->ensureDirectoryExists(dirname($path));
+        $this->files->put($path, "<?php\n\nnamespace App\\Models;\n\nuse Illuminate\\Foundation\\Auth\\User as Authenticatable;\n\nclass CrudTestPost extends Authenticatable\n{\n    protected \$fillable = ['name', 'email', 'password'];\n}\n");
+
+        return $path;
+    }
+
+    public function testAnAuthenticationModelIsNotOverwritten(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+        $path = $this->writeAuthModel();
+
+        $this->artisan('make:crud', ['name' => $this->testTable])->assertSuccessful();
+
+        $content = $this->files->get($path);
+        $this->assertStringContainsString('extends Authenticatable', $content);
+        $this->assertStringContainsString("'password'", $content);
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
+
+    public function testForceOverwritesAnAuthenticationModel(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+        $path = $this->writeAuthModel();
+
+        $this->artisan('make:crud', ['name' => $this->testTable, '--force' => true])->assertSuccessful();
+
+        $this->assertStringContainsString('extends Model', $this->files->get($path));
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
+
+    public function testAnOrdinaryModelIsStillOverwritten(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+
+        $path = app_path('Models/CrudTestPost.php');
+        $this->files->ensureDirectoryExists(dirname($path));
+        $this->files->put($path, "<?php\n\nnamespace App\\Models;\n\nclass CrudTestPost\n{\n    // stale\n}\n");
+
+        $this->artisan('make:crud', ['name' => $this->testTable])
+            ->expectsQuestion('Already exist Model. Do you want overwrite (y/n)?', 'y')
+            ->assertSuccessful();
+
+        $this->assertStringContainsString('extends Model', $this->files->get($path));
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
 }
