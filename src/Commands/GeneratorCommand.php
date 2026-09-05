@@ -458,6 +458,7 @@ abstract class GeneratorCommand extends Command
         list($relations, $properties) = (new ModelGenerator($this->table, $properties, $this->modelNamespace))->getEloquentRelations();
 
         return [
+            '{{table}}' => $this->table,
             '{{fillable}}' => $fillable(),
             '{{rules}}' => $rules(),
             '{{relations}}' => $relations,

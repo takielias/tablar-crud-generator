@@ -583,4 +583,16 @@ class CrudGeneratorTest extends TestCase
             $this->restoreRoutesFile($originalRoutes);
         }
     }
+
+    public function testModelDeclaresTheTableItWasGeneratedFrom(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+
+        $this->artisan('make:crud', ['name' => $this->testTable])->assertSuccessful();
+
+        $model = $this->files->get(app_path('Models/CrudTestPost.php'));
+        $this->assertStringContainsString("protected \$table = '{$this->testTable}';", $model);
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
 }
