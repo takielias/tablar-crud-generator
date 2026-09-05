@@ -272,9 +272,7 @@ abstract class GeneratorCommand extends Command
             '{{modelNamePluralLowerCase}}' => Str::camel(Str::plural($this->name)),
             '{{modelNamePluralUpperCase}}' => ucfirst(Str::plural($this->name)),
             '{{modelNameLowerCase}}' => Str::camel($this->name),
-            '{{modelRoute}}' => ! empty($this->options['route'])
-                ? str_replace('/', '.', ltrim($this->options['route'], '/'))
-                : Str::kebab(Str::plural($this->name)),
+            '{{modelRoute}}' => str_replace('/', '.', ltrim((string) $this->routeName, '/')),
             '{{modelView}}' => Str::kebab($this->name),
         ];
     }

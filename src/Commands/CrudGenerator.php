@@ -231,7 +231,7 @@ class CrudGenerator extends GeneratorCommand
         if($this->crudOptions['route']){
             return $this->crudOptions['route'];
         } 
-        return strtolower($this->name);
+        return Str::kebab(Str::plural($this->name));
     }
 
     /**

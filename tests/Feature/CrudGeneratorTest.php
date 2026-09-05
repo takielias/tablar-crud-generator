@@ -521,4 +521,50 @@ class CrudGeneratorTest extends TestCase
 
         $this->restoreRoutesFile($originalRoutes);
     }
+
+    public function testViewRouteNamesMatchTheRegisteredResourceName(): void
+    {
+        $originalRoutes = $this->getOriginalRoutes();
+
+        $this->artisan('make:crud', ['name' => $this->testTable])->assertSuccessful();
+
+        $routeContent = $this->files->get(base_path('routes/web.php'));
+        preg_match_all("/->names\\('([^']+)'\\)/", $routeContent, $registered);
+        $this->assertNotEmpty($registered[1], 'No ->names() call was written to routes/web.php');
+        $registeredName = end($registered[1]);
+
+        $used = [];
+        foreach ($this->files->files(resource_path('views/crud-test-post')) as $view) {
+            preg_match_all("/route\\('([^']+)\\.[a-z]+'/", $this->files->get($view->getPathname()), $m);
+            $used = array_merge($used, $m[1]);
+        }
+
+        $controller = $this->files->get(app_path('Http/Controllers/CrudTestPostController.php'));
+        preg_match_all("/route\\('([^']+)\\.[a-z]+'/", $controller, $m);
+        $used = array_unique(array_merge($used, $m[1]));
+
+        $this->assertNotEmpty($used, 'Generated output contains no route() calls to verify');
+        $this->assertSame([$registeredName], array_values($used));
+
+        $this->restoreRoutesFile($originalRoutes);
+    }
+
+    public function testCrudNamePluralityDoesNotChangeTheRouteName(): void
+    {
+        foreach (['CrudTestPost', 'CrudTestPosts'] as $crudName) {
+            $this->cleanGeneratedFiles($crudName);
+            $originalRoutes = $this->getOriginalRoutes();
+
+            $this->artisan('make:crud', [
+                'name' => $this->testTable,
+                '--crud-name' => $crudName,
+            ])->assertSuccessful();
+
+            $appended = substr($this->files->get(base_path('routes/web.php')), strlen($originalRoutes));
+            $this->assertStringContainsString("Route::resource('crud-test-posts'", $appended);
+
+            $this->restoreRoutesFile($originalRoutes);
+            $this->cleanGeneratedFiles($crudName);
+        }
+    }
 }
