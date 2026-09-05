@@ -86,6 +86,8 @@ abstract class GeneratorCommand extends Command
      */
     protected $layout = 'layouts.app';
 
+    private const DEFAULT_LAYOUT = 'tablar::page';
+
     /**
      * Custom Options name
      *
@@ -343,16 +345,25 @@ abstract class GeneratorCommand extends Command
      */
     protected function buildLayout(): void
     {
-        if (!(view()->exists($this->layout))) {
+        if (view()->exists($this->layout)) {
+            return;
+        }
 
-            $this->info('Creating Layout ...');
-
-            if ($this->layout == 'layouts.app') {
-                $this->files->copy($this->getStub('layouts/app', false), $this->_getLayoutPath());
-            } else {
+        if ($this->layout != 'layouts.app') {
+            if ($this->layout != self::DEFAULT_LAYOUT) {
                 throw new \Exception("{$this->layout} layout not found!");
             }
+
+            $this->warn("Layout [{$this->layout}] not found, falling back to layouts.app.");
+            $this->layout = 'layouts.app';
+
+            if (view()->exists($this->layout)) {
+                return;
+            }
         }
+
+        $this->info('Creating Layout ...');
+        $this->files->copy($this->getStub('layouts/app', false), $this->_getLayoutPath());
     }
 
     /**

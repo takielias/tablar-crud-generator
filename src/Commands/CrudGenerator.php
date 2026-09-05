@@ -157,14 +157,14 @@ class CrudGenerator extends GeneratorCommand
             $form .= $this->getField($title, $column, 'form-field');
         }
 
+        $this->buildLayout();
+
         $replace = array_merge($this->buildReplacements(), [
             '{{tableHeader}}' => $tableHead,
             '{{tableBody}}' => $tableBody,
             '{{viewRows}}' => $viewRows,
             '{{form}}' => $form,
         ]);
-
-        $this->buildLayout();
 
         foreach (['index', 'create', 'edit', 'form', 'show'] as $view) {
             $viewTemplate = str_replace(

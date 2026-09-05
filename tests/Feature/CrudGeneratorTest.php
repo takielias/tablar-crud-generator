@@ -567,4 +567,20 @@ class CrudGeneratorTest extends TestCase
             $this->cleanGeneratedFiles($crudName);
         }
     }
+
+    public function testMissingConfiguredLayoutStillFails(): void
+    {
+        $this->app['config']->set('crud.layout', 'layouts.definitely-not-here');
+
+        $originalRoutes = $this->getOriginalRoutes();
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('layouts.definitely-not-here layout not found!');
+
+        try {
+            $this->artisan('make:crud', ['name' => $this->testTable]);
+        } finally {
+            $this->restoreRoutesFile($originalRoutes);
+        }
+    }
 }

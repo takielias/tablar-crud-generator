@@ -13,6 +13,15 @@ class CrudServiceProviderTest extends TestCase
         $this->assertArrayHasKey('make:crud', $commands);
     }
 
+    protected function tearDown(): void
+    {
+        if (file_exists(config_path('crud.php'))) {
+            unlink(config_path('crud.php'));
+        }
+
+        parent::tearDown();
+    }
+
     public function testConfigCanBePublished(): void
     {
         $this->artisan('vendor:publish', ['--tag' => 'crud', '--force' => true])
