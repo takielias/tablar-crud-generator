@@ -21,7 +21,8 @@ class CrudGenerator extends GeneratorCommand
                             {name : Table name}
                             {--route= : Custom route name}
                             {--crud-name= : Custom crud name}
-                            {--lang= : language}';
+                            {--lang= : language}
+                            {--force : Overwrite a model even if it is your authentication model}';
 
     /**
      * The console command description.
@@ -115,8 +116,17 @@ class CrudGenerator extends GeneratorCommand
     {
         $modelPath = $this->_getModelPath($this->name);
 
-        if ($this->files->exists($modelPath) && $this->ask('Already exist Model. Do you want overwrite (y/n)?', 'y') == 'n') {
-            return $this;
+        if ($this->files->exists($modelPath)) {
+            if ($this->modelHandlesAuthentication($modelPath) && ! $this->option('force')) {
+                $this->warn("Skipped {$this->name} model: it is your authentication model.");
+                $this->warn('Overwriting it would drop the password from $fillable and break logging in. Re-run with --force to overwrite anyway.');
+
+                return $this;
+            }
+
+            if (! $this->option('force') && $this->ask('Already exist Model. Do you want overwrite (y/n)?', 'y') == 'n') {
+                return $this;
+            }
         }
 
         $this->info('Creating Model ...');
@@ -226,6 +236,14 @@ class CrudGenerator extends GeneratorCommand
      *
      * @return string
      */
+    private function modelHandlesAuthentication(string $modelPath): bool
+    {
+        $source = $this->files->get($modelPath);
+
+        return str_contains($source, 'Authenticatable')
+            || str_contains($source, 'Illuminate\\Contracts\\Auth\\Authenticatable');
+    }
+
     private function _buildRouteName()
     {       
         if($this->crudOptions['route']){
